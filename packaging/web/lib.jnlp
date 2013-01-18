@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <jnlp spec="1.0+"
+codebase="http://localhost:8080/chisio/" href="lib.jnlp">
+ <information>
+<title>Libraries</title>
+<vendor>IVis Project Group</vendor>
+ </information>
+<resources>
+  <jar href="org.eclipse.swt.win32.win32.x86_3.1.1.jar"/>
+<nativelib href="org.eclipse.core.runtime_3.1.1.jar"/>
+<nativelib href="graphml.jar"/>
+<nativelib href="jsr173_1.0_api.jar"/>
+<nativelib href="org.eclipse.core.boot_3.1.0.jar"/>
+<nativelib href="org.eclipse.core.resources_3.1.0.jar"/>
+<nativelib href="org.eclipse.draw2d_3.1.1.jar"/>
+<nativelib href="org.eclipse.gef_3.1.1.jar"/>
+<nativelib href="org.eclipse.jface_3.1.1.jar"/>
+<nativelib href="org.eclipse.osgi_3.1.1.jar"/>
+<nativelib href="org.eclipse.jface_3.1.1.jar"/>
+<nativelib href="org.eclipse.ui.views_3.1.1.jar"/>
+<nativelib href="org.eclipse.ui.workbench_3.1.1.jar"/>
+<nativelib href="org.eclipse.ui_3.1.1.jar"/>
+<nativelib href="xbean.jar"/>
+
+</resources>
+ <component-desc/>
+</jnlp> 

@@ -1,0 +1,227 @@
+<?xml version="1.0" ?>
+<!-- PREREQUISITES:
+	1)	Install JSmooth (for exe wrapping) and Install Creator
+		to your computer from ivis@assos.cs.bilkent.edu.tr/software-download/Packaging&Build/
+		Also make sure ${jsmooth.executable.path} and ${installcreator.executable.path}
+		variables defined below points to correct location.
+	2)	Assign the correct folder name to ${chied2x.dir} variable. This folder
+		is the root project folder checked out from cvs.
+	3)	Assign the correct folder name to ${packaging.sources.dir} variable. Any
+		existing content in this directory will be deleted.
+-->
+<!-- NOTES:
+	If you want to change referenced libraries, version numbers, windows setup 
+	texts or any other setting that is related to exe wrapping or install creator
+	follow these steps:
+	
+	1) Run create-installer-win32, this will copy the two configuration files 
+		(installCreatorProjectFile.iit and jsmoothProjectFile.jsmooth) to 
+		${packaging.sources.dir}.
+	2) Double click to open, edit and save the files after making the changes.
+		Note that you should do editing inside ${packaging.sources.dir} after 
+		all required files are generated in the previous, otherwise, you would 
+		get an error.
+	3) Copy the modified configuration files back ${chied2x.dir}/packaging/windows
+		and run the task again.
+-->
+
+<project name="ChisioEditor" default="create-installer-all">
+	<!-- The root folder where all source files, tools, libraries and 
+		configurations are taken from. As long as the directory structure 
+		preserved, you can change this path to any other one (even on linux)
+		without changing all other dependent paths. -->
+	<property name="chied2x.dir" location="C:\Documents and Settings\Shatlyk\workspace\chied2x" />
+	<property name="chilay2x.dir" location="C:\Documents and Settings\Shatlyk\workspace\chilay2x" />
+
+	<!-- The root folder where all temporary work and final setup files will be 
+		placed. As long as the directory structure preserved, you can change this
+		path to any other one (even on linux). without changing all other 
+		dependent paths-->
+	<property name="packaging.sources.dir" location="c:/ChisioPack"/>
+
+	<!-- Source set related paths. All of them are relative-->
+	<property name="chied2x.src.dir" location="${chied2x.dir}/src" />
+	<property name="chilay2x.src.dir" location="${chilay2x.dir}/src" />
+	
+	<property name="chied2x.lib.dir" location="${chied2x.dir}/lib" />
+	<property name="chilay2x.lib.dir" location="${chilay2x.dir}/lib" />
+	
+	<property name="chied2x.lib.platform.dir" location="${chied2x.dir}/lib-platform" />
+	<property name="chied2x.packaging.dir" location="${chied2x.dir}/packaging" />
+	<property name="chied2x.packaging.windows.dir" location="${chied2x.packaging.dir}/windows" />
+	<property name="chied2x.packaging.linux.dir" location="${chied2x.packaging.dir}/linux" />
+	
+	<!-- Target set related paths. All of them are relative-->
+	<property name="installation.dir" location="${packaging.sources.dir}/installation"/>
+	<property name="installation.classes.dir" location="${installation.dir}/classes"/>
+	<property name="installation.lib.dir" location="${installation.dir}/lib"/>
+	<property name="jar.file.dir" location="${installation.lib.dir}/Chisio.jar" />
+	<property name="jsmooth.executable.path" location="C:\Program Files\JSmooth 0.9.9-7\jsmoothcmd.exe"/>
+	<property name="installcreator.executable.path" location="C:\Program Files\Install Creator\ic.exe"/>
+	<property name="jsmooth.project.file.path" location="${packaging.sources.dir}/jsmoothProjectFile.jsmooth"/>
+	<property name="installcreator.project.filename" location="${packaging.sources.dir}/installCreatorProjectFile.iit"/>
+
+	<!-- The version number, that will be included in the installer file name.-->
+	<!-- WARNING: In order to change version string in the installation process
+		you should modify Install Creator configuration file (*.lit) as explained
+		in the instructions at the top.-->
+	<property name="version" value="2.0.0"/>
+	
+	<!-- Names of the zip file to be created for the linux distribution-->
+	<property name="linux-gtk-x86-zip-filename" value="chied-${version}-setup-gtk-linux-x86.zip"/>
+
+	<!-- Names of the zip file to be created for the windows distribution-->
+	<property name="win32-win32-x86-exe-filename" value="chied-${version}-setup-win32-win32-x86.exe"/>
+
+	<!-- The jar library required for linux-->
+	<property name="swt-gtk-linux-x86-jar" value="swt-3.4.2-gtk-linux-x86.jar"/>
+	<property name="swt-win32-win32-jar" value="swt-3.4.2-win32-win32-x86.jar"/>
+
+	<!-- This target creates required directories and copies required dlls,libs, 
+		configuration files and tools commonly required by windows and linux 
+		installations to work folder -->
+	<target name="prepare-common">
+		<mkdir dir="${packaging.sources.dir}"/>
+		<antcall target="clean"/>		
+		<mkdir dir="${installation.dir}"/>
+		<mkdir dir="${installation.classes.dir}"/>
+		<mkdir dir="${installation.lib.dir}"/>
+		<copydir src="${chied2x.lib.dir}" dest="${installation.lib.dir}"/>
+		<copydir src="${chilay2x.lib.dir}" dest="${installation.lib.dir}"/>
+		<copydir src="${chilay2x.dir}/graphs" dest="${installation.dir}/graphs"/>
+	</target>
+	
+	<!-- This target creates required directories and copies required dlls,libs, 
+		configuration files and tools required for windows installation into the
+		work folder -->
+	<target name="prepare-windows" depends="prepare-common">
+		<copy file="${chied2x.lib.platform.dir}/${swt-win32-win32-jar}"
+			todir="${installation.lib.dir}"/>
+		<copy todir="${packaging.sources.dir}">
+			<fileset dir="${chied2x.packaging.windows.dir}">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<!-- This target creates required directories and copies required dlls,libs, 
+		configuration files and tools required for linux installation into the
+		work folder -->
+	<target name="prepare-linux" depends="prepare-common">
+		<copy file="${chied2x.lib.platform.dir}/${swt-gtk-linux-x86-jar}"
+			todir="${installation.lib.dir}"/>
+		<copy todir="${installation.dir}">
+			<fileset dir="${chied2x.packaging.linux.dir}">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- This target creates jar using the compiled classes -->
+	<target name="create-jar" depends="compile">
+		<jar destfile="${jar.file.dir}">
+			<fileset dir="${installation.classes.dir}" />
+			<fileset dir="${chilay2x.src.dir}">
+				<include name="**/*.*" />
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${chied2x.src.dir}">
+				<include name="**/*.*" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</jar>
+		<deltree dir="${installation.classes.dir}"/>
+	</target>
+
+	<!-- This target compiles the source files using the libraries copied into
+		the installation directory.-->
+	<target name="compile">
+		<javac
+			source="1.5" 
+			target="1.5"
+			destdir="${installation.classes.dir}">
+			<src path="${chilay2x.src.dir}"/>
+			<src path="${chied2x.src.dir}"/>
+			<classpath>
+				<fileset dir="${installation.lib.dir}" includes="*.jar" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<!-- This target creates installer for windows. This target can be directly
+		called since no preprocessing required -->
+	<target name="create-installer-win32-win32" depends="prepare-windows">
+		<antcall target="create-jar"></antcall>
+		<exec executable="${jsmooth.executable.path}">
+			<arg value="${jsmooth.project.file.path}"/>
+		</exec>
+		<exec executable="${installcreator.executable.path}">
+			<arg value="/b"/>
+			<arg value="${installcreator.project.filename}"/>
+		</exec>
+		<move file="${packaging.sources.dir}/setup.exe" 
+			tofile="${packaging.sources.dir}/${win32-win32-x86-exe-filename}"/>
+	</target>
+
+	<!-- This target creates installer for linux. This target can be directly
+		called since no preprocessing required -->
+	<target name="create-installer-linux-gtk" depends="prepare-linux">
+		<antcall target="create-jar"></antcall>
+		
+		<zip destfile="${packaging.sources.dir}/${linux-gtk-x86-zip-filename}">
+			<zipfileset dir="${installation.dir}" 
+				includes="lib/**/* graphs/**/* Chisio.sh README.TXT"/>
+		</zip>
+	</target>
+
+	<!-- This target creates installer for both windows and linux consequitively.
+		At the end you should find an exe and a zip file in the 
+		${packaging.sources.dir} folder-->
+	<target name="create-installer-all">
+		<antcall target="create-installer-win32-win32"></antcall>
+		<antcall target="create-installer-linux-gtk"></antcall>
+		<antcall target="clean"/>
+	</target>
+
+	<!-- This target deletes all files and folder except zip and exe files in 
+		${packaging.sources.dir} folder-->
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="${packaging.sources.dir}" excludes ="*.exe *.zip"/>
+		</delete>
+	</target>
+
+	<!-- This target builds and runs ChisioEditor-->
+	<target name="run-ChisioEditor-win" depends="prepare-windows">
+		<antcall target="create-jar"/>
+		<java classname="org.gvt.ChisioMain" fork="true">
+			<jvmarg value="-Djava.library.path=${installation.dir}" />
+			<classpath>
+				<fileset dir="${installation.lib.dir}" includes="*.jar" />
+			</classpath>
+		</java>
+	</target>
+	
+	<!-- TODO: This target should be revised for Java Web Start support -->
+	<target name="package-web" depends="sign-jars"
+			description="Package WAR">
+		<war destfile="${web.dir}/chied.war"
+			webxml="${web.dir}/web.xml" compress="true">
+			<fileset dir="${web.dir}">
+			<include name="**/*.html"/>
+			<include name="**/*.jnlp"/>
+			<exclude name="**/*.xml"/>
+		</fileset>
+			<fileset dir="${lib.dir}">
+		<filename name="**/*.jar"/>
+		</fileset>
+		</war>
+	</target>
+
+	<!-- TODO: This target should be revised for Java Web Start support -->
+	<target name="sign-jars" depends="create-jar">
+		<echo level="info">Signing JARS...</echo>
+		<signjar jar="${jar.file.dir}" keystore="${keystore}" alias="myself" storepass="password" />
+	</target>
+</project>
+

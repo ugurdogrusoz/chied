@@ -1,0 +1,1 @@
+This directory contains all scripts, tools, libraries and configurations required for building chied2x distribution for Windows and Linux platforms. Please read comments inside chied2x/packagingScript.2.0.xml for further help.

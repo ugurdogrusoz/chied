@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0+" codebase="http://localhost:8080/chisio" href="index.jnlp">
+ <information>
+  <title>Chisio</title>
+  <vendor>IVis Project Group</vendor>
+  <homepage href="index.html"/>
+  <description>Chisio</description>
+  <description kind="short">Chisio</description>
+ </information>
+  <security>
+     <all-permissions/>
+  </security>
+ <resources>
+  <j2se version="1.4+"/>
+  <jar href="chisio.jar"/>
+  <nativelib href="swt-lib.jar"/>
+ <extension name="Libraries" href="lib.jnlp"/>
+ </resources>
+ <resources os="Windows"> 
+ 	<jar href="swt-win32.jar"/>
+ </resources>
+ <resources os="Linux"> 
+ 	<jar href="swt-linux.jar"/>
+ 	<jar href="swt-pi.jar"/> 	
+ </resources>
+ <application-desc main-class="org.gvt.ChisioMain"/>
+</jnlp>
