@@ -112,6 +112,7 @@ public class TopMenuBar
 		clusterMenu.add(new ResetClusterIDAction(chisio));
 		clusterMenu.add(new Separator());
 		clusterMenu.add(new ShowClusterBoundsAction(chisio));
+		clusterMenu.add(new SetNodeLabelsAsClusterIDsAction(chisio));
 		clusterMenu.add(new ColorWithClusterIDAction(chisio));
 
 		// LAYOUT
