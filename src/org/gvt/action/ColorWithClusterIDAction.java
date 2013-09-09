@@ -48,9 +48,10 @@ public class ColorWithClusterIDAction extends Action
 		List clusterIDs = main.getRootGraph().getClusterManager().
 			getClusterIDs();
 
+		Random rnd = new Random();
 		for (int i = 0 ; i < clusterIDs.size(); i++)
 		{
-			Random rnd = new Random();
+			
 			Color c = new Color(null,
 				rnd.nextInt(256),
 				rnd.nextInt(256),
@@ -58,7 +59,9 @@ public class ColorWithClusterIDAction extends Action
 			Iterator iter = this.main.getRootGraph().getClusterManager().
 				getClusterByID((Integer) clusterIDs.get(i)).getNodes().
 				iterator();
-
+/*			System.out.print("Color for cluster id " + this.main.getRootGraph().getClusterManager().
+				getClusterByID((Integer) clusterIDs.get(i)).toString() );
+			System.out.println(" "  + c.toString());*/
 			while (iter.hasNext())
 			{
 				NodeModel node = (NodeModel) iter.next();
@@ -67,10 +70,13 @@ public class ColorWithClusterIDAction extends Action
 				
 				//set cluster color
 				int clusterID = node.getClusters().get(0).getClusterID();
-				
-				ECluster cluster = (ECluster) node.getParentModel().
-					getClusterManager().getClusterByID(clusterID);
-				cluster.setHighlightColor(c);
+					
+				if (node.getClusters().size() == 1)
+				{
+					ECluster cluster = (ECluster) node.getParentModel().
+						getClusterManager().getClusterByID(clusterID);
+					cluster.setHighlightColor(c);
+				}
 			}
 		}
 
