@@ -2,6 +2,7 @@ package org.gvt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,7 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.gvt.Test;
 import org.gvt.action.ZoomAction;
 import org.gvt.model.CompoundModel;
 import org.gvt.model.ECluster;
@@ -23,7 +25,10 @@ import org.ivis.layout.LGraphManager;
 import org.ivis.layout.LNode;
 import org.ivis.layout.Layout;
 import org.ivis.layout.LayoutOptionsPack;
+import org.ivis.layout.cluster.ClusterLayout;
+import org.ivis.util.IGeometry;
 import org.ivis.util.PointD;
+
 
 /**
  * This class manages the operations related to layout. Methods related to
@@ -237,6 +242,69 @@ public class LayoutManager
 	public void postRun()
 	{
 		Runnable postRun = new PostRun(this.main);
+		
+		// TODO: delete test
+		HashSet clusters = new HashSet<Cluster>();
+		Set nodes = this.main.getRootGraph().getNodes();
+		for (Object o: nodes)
+		{
+			NodeModel node = (NodeModel) o;
+			for (Object c : node.getClusters())
+			{
+				Cluster cluster = (Cluster) c;
+				clusters.add(cluster);
+			}			
+		}
+		
+		System.out.println("[POST] Number of nodes :"+ nodes.size()); //test
+		Test.nodes = nodes.size();
+		System.out.println("[POST] Number of clusters :"+ clusters.size()); //test
+		Test.clusters = clusters.size();
+		int undesiredOverlapCount = 0;
+		
+		for (Object o: nodes)
+		{
+			NodeModel node = (NodeModel) o;
+			ArrayList<PointD> nodePolygon;
+			Object [] overlap;
+			node.setBorderColor(NodeModel.DEFAULT_BORDER_COLOR);
+			// Get the node polygon 
+			double left = node.getLeft();
+			double right = node.getRight();
+			double top = node.getTop();
+			double bottom = node.getBottom();
+			nodePolygon = new ArrayList<PointD>(); 
+			nodePolygon.add(new PointD(left, top));
+			nodePolygon.add(new PointD(right, top));
+			nodePolygon.add(new PointD(right, bottom));
+			nodePolygon.add(new PointD(left, bottom));
+			
+			if(this.layout instanceof ClusterLayout)
+			{
+				for (Object c : clusters)
+				{
+					Cluster cluster = (Cluster) c;
+					cluster.calculatePolygon();
+					ArrayList<PointD> clusterPolygon = cluster.getPolygon();
+					// Compare two polygons
+					overlap = IGeometry.convexPolygonOverlap(nodePolygon, clusterPolygon);
+					if (((double) overlap[0]) != 0.0) 
+					{
+						//System.out.println("Node:" + node.getText() +" Polygon:" +cluster.getClusterID());
+						//System.out.println("Node Cluster size:" + node.getClusters().size());
+						if (!node.getClusters().contains(cluster))
+						{
+							node.setBorderColor(new Color(null, 255, 0, 0));
+							undesiredOverlapCount++;
+						}
+					}
+				}
+			}
+		} 
+		// TODO: test code over
+		System.out.println("[POST] " + undesiredOverlapCount + " nodes are misplaced");
+		Test.misplaced = undesiredOverlapCount;
+		Test.writeLog();
 		this.main.getShell().getDisplay().syncExec(postRun);
 	}
 
@@ -291,7 +359,7 @@ public class LayoutManager
 	}
 	
 	/**
-	 * Inner runnable class which is intended to be run before the execution of
+	 * Inner runnable class which is intended to be run during the execution of
 	 * the layout operation.
 	 */
 	private class DuringRun implements Runnable
@@ -311,7 +379,7 @@ public class LayoutManager
 	}
 	
 	/**
-	 * Inner runnable class which is intended to be run before the execution of
+	 * Inner runnable class which is intended to be run after the execution of
 	 * the layout operation.
 	 */
 	private class PostRun implements Runnable

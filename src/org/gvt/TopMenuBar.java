@@ -34,6 +34,7 @@ public class TopMenuBar
 		menuBar.add(fileMenu);
 		fileMenu.add(new NewAction("New", chisio));
 		fileMenu.add(new LoadAction(chisio));
+		fileMenu.add(new TestAction(chisio));
 		fileMenu.add(new CreateRandomGraphAction(chisio));
 		fileMenu.add(new Separator());
 		fileMenu.add(new SaveAction(chisio));

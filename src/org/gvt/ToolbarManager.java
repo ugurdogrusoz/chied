@@ -21,6 +21,7 @@ import org.gvt.action.SpringLayoutAction;
 import org.gvt.action.StopLayoutAction;
 import org.gvt.action.SugiyamaLayoutAction;
 import org.gvt.action.ZoomAction;
+import org.gvt.action.TestAction;
 
 /**
  * This class implements the Chisio toolbar.
@@ -36,6 +37,7 @@ public class ToolbarManager extends ToolBarManager
 		super(style);
 		this.add(new NewAction("New", main));
 		this.add(new LoadAction(main));
+		this.add(new TestAction(main));
 		this.add(new SaveAction(main));
 		this.add(new PrintAction(main));
 		this.add(new Separator());
