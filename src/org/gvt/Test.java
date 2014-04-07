@@ -20,7 +20,7 @@ public class Test
 		time = LayoutConstants.time;
 		iterations = LayoutConstants.iterations;
 		
-		log += filename + "," + nodes + "," + clusters +"," + iterations + "," + time + "," + misplaced + "\n";
+		log += filename + "," + nodes + "," + clusters +"," + layoutType + "," + iterations + "," + time + "," + misplaced + "\n";
 		System.out.print(log);
 		
 		time = 0;
@@ -29,6 +29,7 @@ public class Test
 		nodes = 0;
 		clusters = 0;
 		misplaced = 0;
+		layoutType = "";
 	}
 	
 	public static void writeLogFile()
@@ -52,5 +53,6 @@ public class Test
 	public static int nodes = 0;
 	public static int clusters = 0;
 	public static int misplaced = 0;
+	public static String layoutType = "";
 	
 }

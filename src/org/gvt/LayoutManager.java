@@ -262,6 +262,15 @@ public class LayoutManager
 		Test.clusters = clusters.size();
 		int undesiredOverlapCount = 0;
 		
+		if(this.layout instanceof ClusterLayout)
+		{
+			Test.layoutType = "Cluster";
+		}
+		else
+		{
+			Test.layoutType = "CoSE";
+		}
+		
 		for (Object o: nodes)
 		{
 			NodeModel node = (NodeModel) o;
@@ -279,13 +288,13 @@ public class LayoutManager
 			nodePolygon.add(new PointD(right, bottom));
 			nodePolygon.add(new PointD(left, bottom));
 			
-			if(this.layout instanceof ClusterLayout)
+			for (Object c : clusters)
 			{
-				for (Object c : clusters)
+				Cluster cluster = (Cluster) c;
+				cluster.calculatePolygon();
+				ArrayList<PointD> clusterPolygon = cluster.getPolygon();
+				if (clusterPolygon.size() > 0)
 				{
-					Cluster cluster = (Cluster) c;
-					cluster.calculatePolygon();
-					ArrayList<PointD> clusterPolygon = cluster.getPolygon();
 					// Compare two polygons
 					overlap = IGeometry.convexPolygonOverlap(nodePolygon, clusterPolygon);
 					if (((double) overlap[0]) != 0.0) 
@@ -299,7 +308,7 @@ public class LayoutManager
 						}
 					}
 				}
-			}
+			}			
 		} 
 		// TODO: test code over
 		System.out.println("[POST] " + undesiredOverlapCount + " nodes are misplaced");

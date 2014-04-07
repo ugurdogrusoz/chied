@@ -219,8 +219,14 @@ public class TestAction extends Action
 							addHighlightToCluster(iter.next());
 					}
 				}
-				new CoSELayoutAction(main).run();
-				new ClusterLayoutAction(main).run();
+				for(int counter = 0; counter<20; counter++)
+				{
+					new CoSELayoutAction(main).run();
+				}
+				for(int counter = 0; counter<20; counter++)
+				{
+					new ClusterLayoutAction(main).run();
+				}
 			}
 			Test.writeLogFile();
 		}
