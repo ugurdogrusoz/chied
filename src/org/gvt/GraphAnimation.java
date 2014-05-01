@@ -78,6 +78,10 @@ public class GraphAnimation
 
 		initialStates = new HashMap();
 		finalStates = new HashMap();
+		
+		start = System.currentTimeMillis();
+		finish = start + DURATION;
+		current = start + 20;
 
 		//This part records all layout results.
 		root.validate();
@@ -91,9 +95,7 @@ public class GraphAnimation
 		while (iter.hasNext())
 			recordFinalState((IFigure) iter.next());
 
-		start = System.currentTimeMillis();
-		finish = start + DURATION;
-		current = start + 20;
+
 
 		RECORDING = false;
 		PLAYBACK = true;
