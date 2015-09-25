@@ -42,5 +42,8 @@ public class ClusterLayoutAction extends Action
 			new ClusterLayout());
 		
 		command.execute();
+
+		// let's also color clusters and nodes w.r.t. cluster colors
+		new ColorWithClusterIDAction(this.main).run();
 	}
 }

@@ -1,6 +1,5 @@
 package org.gvt.action;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -15,6 +14,7 @@ import org.gvt.model.CompoundModel;
 import org.gvt.model.ECluster;
 import org.gvt.model.EdgeModel;
 import org.gvt.model.NodeModel;
+import org.ivis.layout.Cluster;
 
 /**
  * This actions paints the nodes according to their cluster informations.
@@ -45,50 +45,61 @@ public class ColorWithClusterIDAction extends Action
 
 	public void run()
 	{
-		List clusterIDs = main.getRootGraph().getClusterManager().
-			getClusterIDs();
-
 		Random rnd = new Random();
+		List clusterIDs = main.getRootGraph().getClusterManager().getClusterIDs();
+		Color [] colors = new Color[clusterIDs.size()];
+		Color [] palette = {
+			new Color(null, 250, 247, 67),
+			new Color(null, 67, 250, 156),
+			new Color(null, 67, 69, 250),
+			new Color(null, 250, 67, 160),
+			new Color(null, 212, 161, 144),
+			new Color(null, 161, 212, 144),
+			new Color(null, 195, 144, 212),
+			new Color(null, 144, 195, 212),
+			new Color(null, 0, 255, 255)};
+
+		// In case we do not have enough colors, use some random ones
+
 		for (int i = 0 ; i < clusterIDs.size(); i++)
 		{
-			
-			Color c = new Color(null,
-				rnd.nextInt(256),
-				rnd.nextInt(256),
-				rnd.nextInt(256));
-			Iterator iter = this.main.getRootGraph().getClusterManager().
-				getClusterByID((Integer) clusterIDs.get(i)).getNodes().
-				iterator();
-/*			System.out.print("Color for cluster id " + this.main.getRootGraph().getClusterManager().
-				getClusterByID((Integer) clusterIDs.get(i)).toString() );
-			System.out.println(" "  + c.toString());*/
-			while (iter.hasNext())
+			if (i < palette.length)
 			{
-				NodeModel node = (NodeModel) iter.next();
-				// node color
-				node.setColor(c);
-				
-				//set cluster color
-				int clusterID = node.getClusters().get(0).getClusterID();
-					
-				if (node.getClusters().size() == 1)
-				{
-					ECluster cluster = (ECluster) node.getParentModel().
-						getClusterManager().getClusterByID(clusterID);
-					cluster.setHighlightColor(c);
-				}
+				colors[i] = palette[i];
+			}
+			else
+			{
+				colors[i] = new Color(null, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
 			}
 		}
 
-		// Nodes which do not belong to any cluster, are colored with
-		// default color
-		CompoundModel root = (CompoundModel) ((ChsRootEditPart) this.main.getViewer().
-			getRootEditPart().getChildren().get(0)).getModel();
+		// Color region of each cluster
+		ECluster cluster;
+
+		for (int i = 0 ; i < clusterIDs.size(); i++)
+		{
+			cluster = (ECluster) (this.main.getRootGraph().getClusterManager().
+					getClusterByID((Integer) clusterIDs.get(i)));
+
+			cluster.setHighlightColor(colors[i]);
+		}
+
+		// Color the nodes of each cluster to be the same as cluster region
+		// color. Fill color is based on cluster color (if in a single cluster;
+		// use white for nodes in multiple clusters); border color is black if
+		// node is not inside the bounds of any cluster it doesn't belong to,
+		// otherwise red. Nodes not in any cluster colored with default color.
+
+		CompoundModel root =
+			(CompoundModel) ((ChsRootEditPart) this.main.getViewer().
+				getRootEditPart().getChildren().get(0)).getModel();
 		Iterator nodeIter = root.getNodes().iterator();
 
 		while (nodeIter.hasNext())
 		{
 			NodeModel node = (NodeModel) nodeIter.next();
+
+			// fill color
 
 			if (node.getClusters().isEmpty())
 			{
@@ -101,9 +112,39 @@ public class ColorWithClusterIDAction extends Action
 					node.setColor(NodeModel.DEFAULT_COLOR);
 				}
 			}
+			if (node.getClusters().size() == 1)
+			{
+				// fill color same as cluster color
+				cluster = (ECluster)(node.getClusters().get(0));
+				node.setColor(cluster.getHighlightColor());
+			}
+			else
+			{
+				// white if in multiple clusters
+				node.setColor(new Color(null, 255, 255, 255));
+			}
+
+			// border color
+
+			Color borderColor = new Color(null, 0, 0, 0);
+
+			for (Cluster c : this.main.getRootGraph().getClusterManager().getClusters())
+			{
+				if (!c.getNodes().contains(node))
+				{
+					if (c.isPartiallyInsideClusterBounds(node))
+					{
+						borderColor = new Color(null, 255, 0, 0);
+						break;
+					}
+				}
+			}
+
+			node.setBorderColor(borderColor);
 		}
 
-		// Color intra-graph edges lighter then inter-graph edges.
+		// Color intra-graph edges lighter then inter-graph edges
+
 		for (Object edgeObject : root.getEdges())
 		{
 			EdgeModel edge = (EdgeModel) edgeObject;
